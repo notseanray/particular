@@ -1,4 +1,4 @@
-use glam::Vec3;
+use glam::Vec3A;
 
 /// Trait to describe a particle which consists of a `position` and a gravitational parameter `mu`.
 ///
@@ -9,11 +9,11 @@ use glam::Vec3;
 /// Used in most cases, when your type has fields named `position` and `mu`
 /// ```
 /// # use particular::prelude::Particle;
-/// # use glam::Vec3;
+/// # use glam::Vec3A;
 /// #
 /// #[derive(Particle)]
 /// pub struct Body {
-///     position: Vec3,
+///     position: Vec3A,
 ///     mu: f32,
 /// //  ...
 /// }
@@ -26,19 +26,19 @@ use glam::Vec3;
 /// # const G: f32 = 1.0;
 /// #
 /// # use particular::Particle;
-/// # use glam::Vec3;
+/// # use glam::Vec3A;
 /// #
 /// struct Body {
-///     position: Vec3,
+///     position: Vec3A,
 ///     mass: f32,
 /// //  ...
 /// }
 ///
 /// impl Particle for Body {
-///     fn position(&self) -> Vec3 {
+///     fn position(&self) -> Vec3A {
 ///         self.position
 ///     }
-///     
+///
 ///     fn mu(&self) -> f32 {
 ///         self.mass * G
 ///     }
@@ -46,7 +46,7 @@ use glam::Vec3;
 /// ```
 pub trait Particle {
     /// The position of the particle described by a [`Vec3`].
-    fn position(&self) -> Vec3;
+    fn position(&self) -> Vec3A;
 
     /// The [standard gravitational parameter](https://en.wikipedia.org/wiki/Standard_gravitational_parameter) of the particle, annoted `µ`.
     ///
@@ -54,7 +54,7 @@ pub trait Particle {
     fn mu(&self) -> f32;
 }
 
-pub(crate) type PointMass = (Vec3, f32);
+pub(crate) type PointMass = (Vec3A, f32);
 
 pub(crate) trait ToPointMass {
     fn point_mass(&self) -> PointMass;

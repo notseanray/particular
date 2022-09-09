@@ -18,11 +18,11 @@
 //! Used in most cases, when your type has fields named `position` and `mu`.
 //! ```
 //! # use particular::prelude::Particle;
-//! # use glam::Vec3;
+//! # use glam::Vec3A;
 //! #
 //! #[derive(Particle)]
 //! pub struct Body {
-//!     position: Vec3,
+//!     position: Vec3A,
 //!     mu: f32,
 //! //  ...
 //! }
@@ -34,19 +34,19 @@
 //! # const G: f32 = 1.0;
 //! #
 //! # use particular::Particle;
-//! # use glam::Vec3;
+//! # use glam::Vec3A;
 //! #
 //! struct Body {
-//!     position: Vec3,
+//!     position: Vec3A,
 //!     mass: f32,
 //! //  ...
 //! }
 //!
 //! impl Particle for Body {
-//!     fn position(&self) -> Vec3 {
+//!     fn position(&self) -> Vec3A {
 //!         self.position
 //!     }
-//!     
+//!
 //!     fn mu(&self) -> f32 {
 //!         self.mass * G
 //!     }
@@ -59,15 +59,15 @@
 //! ```
 //! # use particular::prelude::Particle;
 //! # use particular::ParticleSet;
-//! # use glam::Vec3;
+//! # use glam::Vec3A;
 //! #
 //! # #[derive(Particle)]
 //! # pub struct Body {
-//! #     position: Vec3,
+//! #     position: Vec3A,
 //! #     mu: f32,
 //! # //  ...
 //! # }
-//! # let position = Vec3::ONE;
+//! # let position = Vec3A::ONE;
 //! # let mu = 1E5;
 //! #
 //! let mut particle_set = ParticleSet::new();
@@ -81,14 +81,14 @@
 //! ```
 //! # use particular::prelude::Particle;
 //! # use particular::ParticleSet;
-//! # use glam::Vec3;
+//! # use glam::Vec3A;
 //! #
 //! # const DT: f32 = 1.0 / 60.0;
 //! #
 //! # #[derive(Particle)]
 //! # pub struct Body {
-//! #     position: Vec3,
-//! #     velocity: Vec3,
+//! #     position: Vec3A,
+//! #     velocity: Vec3A,
 //! #     mu: f32,
 //! # }
 //! # let mut particle_set = ParticleSet::<Body>::new();

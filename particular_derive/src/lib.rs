@@ -6,7 +6,7 @@ use quote::quote;
 #[proc_macro_derive(Particle)]
 pub fn particle_derive(input: TokenStream) -> TokenStream {
     let ast = syn::parse(input).unwrap();
-    
+
     impl_particle(&ast)
 }
 
@@ -16,10 +16,10 @@ fn impl_particle(ast: &syn::DeriveInput) -> TokenStream {
 
     let gen = quote! {
         impl #impl_generics Particle for #name #ty_generics #where_clause {
-            fn position(&self) -> Vec3 {
+            fn position(&self) -> Vec3A {
                 self.position
             }
-        
+
             fn mu(&self) -> f32 {
                 self.mu
             }

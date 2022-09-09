@@ -1,6 +1,6 @@
 use crate::particle::{Particle, ToPointMass};
 
-use glam::Vec3;
+use glam::Vec3A;
 #[cfg(feature = "parallel")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
@@ -17,12 +17,19 @@ impl<P: Particle + Sync> ParticleSet<P> {
             massless: Vec::new(),
         }
     }
+    pub fn new_with_capacity(massive: usize, massless: usize) -> Self {
+        Self {
+            massive: Vec::with_capacity(massive),
+            massless: Vec::with_capacity(massless),
+        }
+    }
 }
 
 impl<P: Particle + Sync> ParticleSet<P> {
     /// Adds a [`Particle`] to the [`ParticleSet`].
     ///
     /// Particles are stored in two vectors, `massive` or `massless`, depending on if they have mass or not.
+    #[inline]
     pub fn add(&mut self, particle: P) {
         if particle.mu() != 0.0 {
             self.massive.push(particle);
@@ -34,12 +41,12 @@ impl<P: Particle + Sync> ParticleSet<P> {
 
 impl<P: Particle + Sync> ParticleSet<P> {
     #[cfg(not(feature = "parallel"))]
-    fn get_accelerations(&self) -> Vec<Vec3> {
+    fn get_accelerations(&self) -> Vec<Vec3A> {
         let massive = self.massive.iter().map(P::point_mass).collect::<Vec<_>>();
         let massless = self.massless.iter().map(P::point_mass).collect::<Vec<_>>();
 
         let accelerations = massive.iter().chain(&massless).map(|particle1| {
-            massive.iter().fold(Vec3::ZERO, |acceleration, particle2| {
+            massive.iter().fold(Vec3A::ZERO, |acceleration, particle2| {
                 let dir = particle2.0 - particle1.0;
                 let mag_2 = dir.length_squared();
 
@@ -57,12 +64,12 @@ impl<P: Particle + Sync> ParticleSet<P> {
     }
 
     #[cfg(feature = "parallel")]
-    fn get_accelerations(&self) -> Vec<Vec3> {
+    fn get_accelerations(&self) -> Vec<Vec3A> {
         let massive = self.massive.iter().map(P::point_mass).collect::<Vec<_>>();
         let massless = self.massless.iter().map(P::point_mass).collect::<Vec<_>>();
 
         let accelerations = massive.par_iter().chain(&massless).map(|particle1| {
-            massive.iter().fold(Vec3::ZERO, |acceleration, particle2| {
+            massive.iter().fold(Vec3A::ZERO, |acceleration, particle2| {
                 let dir = particle2.0 - particle1.0;
                 let mag_2 = dir.length_squared();
 
@@ -80,11 +87,13 @@ impl<P: Particle + Sync> ParticleSet<P> {
     }
 
     /// Iterates over the `massive` particles, then the `massless` ones.
+    #[inline]
     pub fn iter(&self) -> impl Iterator<Item = &P> {
         self.massive.iter().chain(&self.massless)
     }
 
     /// Mutably iterates over the `massive` particles, then the `massless` ones.
+    #[inline]
     pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut P> {
         self.massive.iter_mut().chain(&mut self.massless)
     }
@@ -94,14 +103,14 @@ impl<P: Particle + Sync> ParticleSet<P> {
     /// ```
     /// # use particular::prelude::Particle;
     /// # use particular::ParticleSet;
-    /// # use glam::Vec3;
+    /// # use glam::Vec3A;
     /// #
     /// # const DT: f32 = 1.0 / 60.0;
     /// #
     /// # #[derive(Particle)]
     /// # pub struct Body {
-    /// #     position: Vec3,
-    /// #     velocity: Vec3,
+    /// #     position: Vec3A,
+    /// #     velocity: Vec3A,
     /// #     mu: f32,
     /// # }
     /// # let mut particle_set = ParticleSet::<Body>::new();
@@ -110,7 +119,8 @@ impl<P: Particle + Sync> ParticleSet<P> {
     ///     particle.position += particle.velocity * DT;
     /// }
     /// ```
-    pub fn result(&mut self) -> impl Iterator<Item = (&mut P, Vec3)> {
+    #[inline]
+    pub fn result(&mut self) -> impl Iterator<Item = (&mut P, Vec3A)> {
         let accelerations = self.get_accelerations();
         let particles = self.iter_mut();
         particles.zip(accelerations)
@@ -120,12 +130,12 @@ impl<P: Particle + Sync> ParticleSet<P> {
 #[cfg(test)]
 pub mod tests {
     use crate::{Particle, ParticleSet, PointMass, ToPointMass};
-    use glam::Vec3;
+    use glam::Vec3A;
     use particular_derive::Particle;
 
     #[derive(Particle)]
     struct Body {
-        position: Vec3,
+        position: Vec3A,
         mu: f32,
     }
 
@@ -147,8 +157,8 @@ pub mod tests {
 
     #[test]
     fn add_particles() {
-        let p1 = (Vec3::ONE, 0.0);
-        let p2 = (Vec3::NEG_ONE, 8.0);
+        let p1 = (Vec3A::ONE, 0.0);
+        let p2 = (Vec3A::NEG_ONE, 8.0);
 
         let particle_set = with_two_particles(p1, p2);
         let mut iter = particle_set.iter();
@@ -161,8 +171,8 @@ pub mod tests {
 
     #[test]
     fn acceleration_calculation() {
-        let p1 = (Vec3::ZERO, 0.0);
-        let p2 = (Vec3::splat(1.0), 3.0);
+        let p1 = (Vec3A::ZERO, 0.0);
+        let p2 = (Vec3A::splat(1.0), 3.0);
 
         let dir = p2.0 - p1.0;
         let mag_2 = dir.length_squared();
